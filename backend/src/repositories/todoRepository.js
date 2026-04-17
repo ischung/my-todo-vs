@@ -56,4 +56,10 @@ function update(id, patch) {
   return findById(id);
 }
 
-module.exports = { findByDate, findById, create, update };
+function remove(id) {
+  const db = getDb();
+  const result = db.prepare('DELETE FROM todos WHERE id = ?').run(id);
+  return result.changes > 0;
+}
+
+module.exports = { findByDate, findById, create, update, remove };

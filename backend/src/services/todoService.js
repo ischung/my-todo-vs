@@ -58,4 +58,15 @@ function updateTodo(id, patch) {
   return updated;
 }
 
-module.exports = { listByDate, createTodo, updateTodo, HttpError };
+function deleteTodo(id) {
+  const parsedId = Number(id);
+  if (!Number.isInteger(parsedId) || parsedId <= 0) {
+    throw new HttpError(400, '잘못된 ID입니다.');
+  }
+  const removed = repo.remove(parsedId);
+  if (!removed) {
+    throw new HttpError(404, '해당 할일을 찾을 수 없습니다.');
+  }
+}
+
+module.exports = { listByDate, createTodo, updateTodo, deleteTodo, HttpError };

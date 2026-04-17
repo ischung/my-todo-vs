@@ -9,6 +9,7 @@ export default function TodoPanel({
   onAdd,
   onToggle,
   onEdit,
+  onDelete,
 }) {
   return (
     <div className="bg-white rounded-lg shadow p-4">
@@ -34,7 +35,13 @@ export default function TodoPanel({
       {!loading && !error && todos.length > 0 && (
         <ul className="space-y-2">
           {todos.map((t) => (
-            <TodoItem key={t.id} todo={t} onToggle={onToggle} onEdit={onEdit} />
+            <TodoItem
+              key={t.id}
+              todo={t}
+              onToggle={onToggle}
+              onEdit={onEdit}
+              onDelete={onDelete}
+            />
           ))}
         </ul>
       )}
