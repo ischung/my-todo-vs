@@ -8,11 +8,8 @@ describe('App', () => {
       'fetch',
       vi.fn().mockResolvedValue({
         ok: true,
-        json: async () => ({
-          status: 'ok',
-          timestamp: '2026-04-17T12:00:00.000Z',
-          version: 'test',
-        }),
+        status: 200,
+        json: async () => [],
       })
     );
   });
@@ -22,8 +19,15 @@ describe('App', () => {
     expect(screen.getByText('날짜별 할일 관리')).toBeInTheDocument();
   });
 
-  it('shows loading state initially', () => {
+  it('renders week day headers', () => {
     render(<App />);
-    expect(screen.getByText(/서버 확인 중/)).toBeInTheDocument();
+    expect(screen.getByText('일')).toBeInTheDocument();
+    expect(screen.getByText('토')).toBeInTheDocument();
+  });
+
+  it('renders month navigation buttons', () => {
+    render(<App />);
+    expect(screen.getByLabelText('이전 달')).toBeInTheDocument();
+    expect(screen.getByLabelText('다음 달')).toBeInTheDocument();
   });
 });
