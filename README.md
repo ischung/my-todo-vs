@@ -40,12 +40,25 @@ npm run dev:backend
 npm run dev:frontend
 ```
 
-### Docker 실행 (추후, issue #6 완료 후)
+### Docker 실행 ✅ (issue #6 완료)
 
 ```bash
-docker-compose up
+# 한 번에 빌드 + 기동
+docker compose up --build
+
+# 브라우저
 open http://localhost:8080
 ```
+
+또는 Docker CLI 직접 사용:
+```bash
+docker build -t my-todo-vs:dev .
+docker run -d -p 8080:8080 -v $(pwd)/data:/app/data my-todo-vs:dev
+```
+
+- 로컬 SQLite 파일: `./data/todo.db` (컨테이너의 `/app/data`에 bind-mount)
+- Healthcheck: 30초 간격 `/api/health` 호출
+- 이미지 크기: ~225MB (better-sqlite3 native 포함)
 
 ### GHCR 이미지 사용 (추후, issue #7 완료 후)
 
