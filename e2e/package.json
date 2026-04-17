@@ -4,8 +4,8 @@
   "private": true,
   "description": "Playwright E2E tests — targeting locally-running Docker container",
   "scripts": {
-    "test": "playwright test",
-    "test:smoke": "playwright test --grep @smoke",
+    "smoke": "playwright test --grep @smoke",
+    "e2e": "playwright test",
     "report": "playwright show-report"
   },
   "devDependencies": {

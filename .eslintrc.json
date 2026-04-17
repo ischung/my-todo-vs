@@ -1,0 +1,48 @@
+{
+  "root": true,
+  "env": {
+    "browser": true,
+    "node": true,
+    "es2022": true,
+    "jest": true
+  },
+  "extends": ["eslint:recommended", "plugin:react/recommended", "plugin:react/jsx-runtime"],
+  "plugins": ["react"],
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module",
+    "ecmaFeatures": { "jsx": true }
+  },
+  "settings": {
+    "react": { "version": "detect" }
+  },
+  "rules": {
+    "no-unused-vars": ["warn", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^React$" }],
+    "no-console": "off",
+    "react/prop-types": "off"
+  },
+  "overrides": [
+    {
+      "files": ["backend/**/*.js"],
+      "parserOptions": { "sourceType": "script" },
+      "env": { "node": true, "browser": false }
+    },
+    {
+      "files": ["frontend/**/*.{js,jsx}", "e2e/**/*.js"],
+      "parserOptions": { "sourceType": "module" }
+    },
+    {
+      "files": ["**/*.test.{js,jsx}", "**/tests/**/*.js"],
+      "env": { "jest": true, "node": true },
+      "globals": { "describe": "readonly", "it": "readonly", "expect": "readonly", "beforeEach": "readonly", "afterEach": "readonly", "beforeAll": "readonly", "afterAll": "readonly", "vi": "readonly" }
+    }
+  ],
+  "ignorePatterns": [
+    "node_modules",
+    "dist",
+    "coverage",
+    "playwright-report",
+    "test-results",
+    "**/node_modules"
+  ]
+}
