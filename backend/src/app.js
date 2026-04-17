@@ -26,6 +26,18 @@ function createApp(opts = {}) {
     });
   });
 
+  app.use('/api/todos', require('./routes/todos'));
+
+  // Domain error handler
+  app.use((err, _req, res, _next) => {
+    if (err && err.status) {
+      return res.status(err.status).json({ error: { message: err.message } });
+    }
+    // eslint-disable-next-line no-console
+    console.error('[app] unhandled error', err);
+    res.status(500).json({ error: { message: '서버 오류가 발생했습니다.' } });
+  });
+
   // Serve built frontend SPA from backend (same-origin, no CORS).
   const spaDir =
     opts.spaDir || path.resolve(__dirname, '..', '..', 'frontend', 'dist');

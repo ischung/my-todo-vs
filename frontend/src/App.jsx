@@ -1,47 +1,68 @@
 import { useEffect, useState } from 'react';
+import Calendar from './components/Calendar.jsx';
+import TodoPanel from './components/TodoPanel.jsx';
+import { fetchTodosByDate } from './api/todos.js';
+import { todayISO } from './utils/date.js';
+
+function initialMonth() {
+  const now = new Date();
+  return { year: now.getFullYear(), month: now.getMonth() };
+}
 
 export default function App() {
-  const [health, setHealth] = useState({ state: 'loading' });
+  const [selectedDate, setSelectedDate] = useState(todayISO());
+  const [{ year, month }, setCurrentMonth] = useState(initialMonth);
+  const [todos, setTodos] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch('/api/health')
-      .then((r) => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json();
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+    fetchTodosByDate(selectedDate)
+      .then((list) => {
+        if (!cancelled) setTodos(list);
       })
-      .then((body) =>
-        setHealth({ state: 'ok', timestamp: body.timestamp, version: body.version })
-      )
-      .catch((err) => setHealth({ state: 'error', message: err.message }));
-  }, []);
+      .catch((err) => {
+        if (!cancelled) setError(err.message);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedDate]);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="bg-white rounded-lg shadow p-8 max-w-md w-full">
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">
-          날짜별 할일 관리
-        </h1>
-
-        {health.state === 'loading' && (
-          <p className="text-gray-500">서버 확인 중…</p>
-        )}
-
-        {health.state === 'ok' && (
-          <p className="text-green-600">
-            ✅ 서버 연결 OK ({health.timestamp})
-          </p>
-        )}
-
-        {health.state === 'error' && (
-          <p className="text-red-500">
-            ❌ 서버에 연결할 수 없어요 ({health.message})
-          </p>
-        )}
-
-        <p className="text-gray-500 text-sm mt-4">
-          실제 기능 UI는 issue #14부터 구현됩니다.
+    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+      <header className="max-w-5xl mx-auto mb-4">
+        <h1 className="text-2xl font-bold text-gray-900">날짜별 할일 관리</h1>
+        <p className="text-sm text-gray-500">
+          서버 연결 OK — 캘린더에서 날짜를 선택하세요
         </p>
-      </div>
+      </header>
+
+      <main className="max-w-5xl mx-auto grid md:grid-cols-5 gap-4">
+        <div className="md:col-span-2">
+          <Calendar
+            year={year}
+            month={month}
+            selectedDate={selectedDate}
+            onSelectDate={setSelectedDate}
+            onChangeMonth={setCurrentMonth}
+          />
+        </div>
+        <div className="md:col-span-3">
+          <TodoPanel
+            selectedDate={selectedDate}
+            todos={todos}
+            loading={loading}
+            error={error}
+          />
+        </div>
+      </main>
     </div>
   );
 }
