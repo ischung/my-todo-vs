@@ -12,6 +12,10 @@ export function fetchTodosByDate(date) {
   return fetch(`/api/todos?date=${encodeURIComponent(date)}`).then(handle);
 }
 
+export function fetchMarkedDates(year, month) {
+  return fetch(`/api/todos/dates?year=${year}&month=${month}`).then(handle);
+}
+
 export function createTodo({ title, date }) {
   return fetch('/api/todos', {
     method: 'POST',

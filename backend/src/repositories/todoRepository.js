@@ -62,4 +62,15 @@ function remove(id) {
   return result.changes > 0;
 }
 
-module.exports = { findByDate, findById, create, update, remove };
+function findDatesInMonth(year, month) {
+  const db = getDb();
+  // Format: YYYY-MM-%. Month comes as 1-12 integer.
+  const mm = String(month).padStart(2, '0');
+  const prefix = `${year}-${mm}-`;
+  const rows = db
+    .prepare("SELECT DISTINCT date FROM todos WHERE date LIKE ? || '%' ORDER BY date ASC")
+    .all(prefix);
+  return rows.map((r) => r.date);
+}
+
+module.exports = { findByDate, findById, create, update, remove, findDatesInMonth };

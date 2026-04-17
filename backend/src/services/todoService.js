@@ -69,4 +69,23 @@ function deleteTodo(id) {
   }
 }
 
-module.exports = { listByDate, createTodo, updateTodo, deleteTodo, HttpError };
+function listDatesInMonth(year, month) {
+  const y = Number(year);
+  const m = Number(month);
+  if (!Number.isInteger(y) || y < 1900 || y > 3000) {
+    throw new HttpError(400, 'year 값이 잘못되었습니다.');
+  }
+  if (!Number.isInteger(m) || m < 1 || m > 12) {
+    throw new HttpError(400, 'month 값은 1~12 사이여야 합니다.');
+  }
+  return repo.findDatesInMonth(y, m);
+}
+
+module.exports = {
+  listByDate,
+  createTodo,
+  updateTodo,
+  deleteTodo,
+  listDatesInMonth,
+  HttpError,
+};

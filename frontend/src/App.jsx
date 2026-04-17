@@ -4,6 +4,7 @@ import TodoPanel from './components/TodoPanel.jsx';
 import Toast from './components/Toast.jsx';
 import {
   fetchTodosByDate,
+  fetchMarkedDates,
   createTodo,
   updateTodo,
   deleteTodo,
@@ -22,12 +23,16 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [toast, setToast] = useState(null);
+  const [markedDates, setMarkedDates] = useState([]);
 
   const handleAdd = useCallback(
     async (title) => {
       try {
         const todo = await createTodo({ title, date: selectedDate });
         setTodos((prev) => [...prev, todo]);
+        setMarkedDates((prev) =>
+          prev.includes(selectedDate) ? prev : [...prev, selectedDate].sort()
+        );
       } catch (err) {
         setToast(err.message || '저장하지 못했어요. 다시 시도해주세요.');
       }
@@ -50,14 +55,23 @@ export default function App() {
     return updated;
   }, []);
 
-  const handleDelete = useCallback(async (id) => {
-    try {
-      await deleteTodo(id);
-      setTodos((prev) => prev.filter((t) => t.id !== id));
-    } catch (err) {
-      setToast(err.message || '삭제하지 못했어요. 다시 시도해주세요.');
-    }
-  }, []);
+  const handleDelete = useCallback(
+    async (id) => {
+      try {
+        await deleteTodo(id);
+        setTodos((prev) => {
+          const remaining = prev.filter((t) => t.id !== id);
+          if (remaining.length === 0) {
+            setMarkedDates((marks) => marks.filter((d) => d !== selectedDate));
+          }
+          return remaining;
+        });
+      } catch (err) {
+        setToast(err.message || '삭제하지 못했어요. 다시 시도해주세요.');
+      }
+    },
+    [selectedDate]
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -78,6 +92,20 @@ export default function App() {
     };
   }, [selectedDate]);
 
+  useEffect(() => {
+    let cancelled = false;
+    fetchMarkedDates(year, month + 1)
+      .then((dates) => {
+        if (!cancelled) setMarkedDates(dates);
+      })
+      .catch(() => {
+        if (!cancelled) setMarkedDates([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [year, month]);
+
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
       <header className="max-w-5xl mx-auto mb-4">
@@ -93,6 +121,7 @@ export default function App() {
             year={year}
             month={month}
             selectedDate={selectedDate}
+            markedDates={markedDates}
             onSelectDate={setSelectedDate}
             onChangeMonth={setCurrentMonth}
           />

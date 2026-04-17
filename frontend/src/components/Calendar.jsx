@@ -2,9 +2,17 @@ import { monthGrid, monthLabel, addMonths, toISO, todayISO } from '../utils/date
 
 const WEEK_DAYS = ['일', '월', '화', '수', '목', '금', '토'];
 
-export default function Calendar({ year, month, selectedDate, onSelectDate, onChangeMonth }) {
+export default function Calendar({
+  year,
+  month,
+  selectedDate,
+  markedDates = [],
+  onSelectDate,
+  onChangeMonth,
+}) {
   const cells = monthGrid(year, month);
   const today = todayISO();
+  const markedSet = new Set(markedDates);
 
   return (
     <div className="bg-white rounded-lg shadow p-4">
@@ -42,6 +50,7 @@ export default function Calendar({ year, month, selectedDate, onSelectDate, onCh
           const inMonth = d.getMonth() === month;
           const isToday = iso === today;
           const isSelected = iso === selectedDate;
+          const isMarked = markedSet.has(iso);
           return (
             <button
               key={iso}
@@ -50,13 +59,24 @@ export default function Calendar({ year, month, selectedDate, onSelectDate, onCh
               aria-label={iso}
               aria-pressed={isSelected}
               className={[
-                'aspect-square flex items-center justify-center rounded-md text-sm',
+                'aspect-square flex flex-col items-center justify-center rounded-md text-sm relative',
                 inMonth ? 'text-gray-900' : 'text-gray-300',
-                isSelected ? 'bg-blue-500 text-white hover:bg-blue-600' : 'hover:bg-gray-100',
+                isSelected
+                  ? 'bg-blue-500 text-white hover:bg-blue-600'
+                  : 'hover:bg-gray-100',
                 isToday && !isSelected ? 'ring-2 ring-blue-500' : '',
               ].join(' ')}
             >
-              {d.getDate()}
+              <span>{d.getDate()}</span>
+              {isMarked && (
+                <span
+                  data-testid="date-marker"
+                  aria-hidden="true"
+                  className={`w-1.5 h-1.5 rounded-full mt-0.5 ${
+                    isSelected ? 'bg-white' : 'bg-blue-500'
+                  }`}
+                />
+              )}
             </button>
           );
         })}
