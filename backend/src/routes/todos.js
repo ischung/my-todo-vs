@@ -22,4 +22,13 @@ router.post('/', (req, res, next) => {
   }
 });
 
+router.patch('/:id', (req, res, next) => {
+  try {
+    const todo = service.updateTodo(req.params.id, req.body || {});
+    res.json(todo);
+  } catch (err) {
+    next(err);
+  }
+});
+
 module.exports = router;
