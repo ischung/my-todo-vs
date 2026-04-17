@@ -36,10 +36,11 @@ COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/backend ./backend
 COPY --from=build /app/frontend/dist ./frontend/dist
 
+ARG GIT_SHA=dev
 ENV NODE_ENV=production \
     PORT=8080 \
     DB_PATH=/app/data/todo.db \
-    GIT_SHA=dev
+    GIT_SHA=${GIT_SHA}
 
 # Persistent DB goes here
 VOLUME /app/data
