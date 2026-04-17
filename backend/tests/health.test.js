@@ -2,7 +2,8 @@ const request = require('supertest');
 const { createApp } = require('../src/app');
 
 describe('GET /api/health', () => {
-  const app = createApp();
+  // Use a non-existent SPA dir to test API-only behavior
+  const app = createApp({ spaDir: '/nonexistent' });
 
   it('returns 200 with status ok', async () => {
     const res = await request(app).get('/api/health');
