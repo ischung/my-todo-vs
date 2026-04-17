@@ -1,0 +1,16 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: my-todo-vs:dev
+    container_name: my-todo-app
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/app/data
+    environment:
+      NODE_ENV: production
+      PORT: 8080
+      DB_PATH: /app/data/todo.db
+    restart: unless-stopped
