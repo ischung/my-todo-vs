@@ -1,0 +1,123 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag (e.g. v0.1.0)'
+        required: true
+
+permissions:
+  contents: write      # create GitHub Release
+  packages: write      # retag GHCR image
+  pages: write         # deploy to Pages
+  id-token: write      # Pages auth
+
+env:
+  IMAGE: ghcr.io/${{ github.repository }}
+
+jobs:
+  retag:
+    name: Retag image → :stable + :version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Resolve version
+        id: ver
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "version=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=${{ github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Retag :stable and :version from :latest
+        run: |
+          VER="${{ steps.ver.outputs.version }}"
+          docker buildx imagetools create -t "${{ env.IMAGE }}:stable" "${{ env.IMAGE }}:latest"
+          docker buildx imagetools create -t "${{ env.IMAGE }}:${VER}" "${{ env.IMAGE }}:latest"
+
+  github-release:
+    name: Create GitHub Release
+    needs: retag
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - name: Resolve version
+        id: ver
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "version=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=${{ github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          PREV=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          {
+            echo "## 변경사항"
+            echo ""
+            if [ -n "$PREV" ]; then
+              git log "$PREV"..HEAD --pretty=format:"- %s" -- ':(exclude)package-lock.json'
+            else
+              git log --pretty=format:"- %s" -- ':(exclude)package-lock.json' | head -30
+            fi
+            echo ""
+            echo ""
+            echo "## Docker 이미지"
+            echo ""
+            echo "\`\`\`bash"
+            echo "docker pull ghcr.io/${{ github.repository }}:${{ steps.ver.outputs.version }}"
+            echo "\`\`\`"
+          } > NOTES.md
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          body_path: NOTES.md
+          name: Release ${{ steps.ver.outputs.version }}
+          tag_name: ${{ steps.ver.outputs.version }}
+
+  pages:
+    name: Deploy landing page
+    needs: retag
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve version
+        id: ver
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "version=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=${{ github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Generate landing page
+        run: |
+          mkdir -p _site
+          sed "s|__VERSION__|${{ steps.ver.outputs.version }}|g" \
+            docs/landing.template.html > _site/index.html
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - id: deploy
+        uses: actions/deploy-pages@v4
