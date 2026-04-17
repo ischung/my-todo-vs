@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Calendar from './components/Calendar.jsx';
 import TodoPanel from './components/TodoPanel.jsx';
-import { fetchTodosByDate } from './api/todos.js';
+import Toast from './components/Toast.jsx';
+import { fetchTodosByDate, createTodo } from './api/todos.js';
 import { todayISO } from './utils/date.js';
 
 function initialMonth() {
@@ -15,6 +16,19 @@ export default function App() {
   const [todos, setTodos] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [toast, setToast] = useState(null);
+
+  const handleAdd = useCallback(
+    async (title) => {
+      try {
+        const todo = await createTodo({ title, date: selectedDate });
+        setTodos((prev) => [...prev, todo]);
+      } catch (err) {
+        setToast(err.message || '저장하지 못했어요. 다시 시도해주세요.');
+      }
+    },
+    [selectedDate]
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -60,9 +74,11 @@ export default function App() {
             todos={todos}
             loading={loading}
             error={error}
+            onAdd={handleAdd}
           />
         </div>
       </main>
+      <Toast message={toast} onDismiss={() => setToast(null)} />
     </div>
   );
 }
