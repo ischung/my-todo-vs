@@ -1,6 +1,15 @@
 import TodoInput from './TodoInput.jsx';
+import TodoItem from './TodoItem.jsx';
 
-export default function TodoPanel({ selectedDate, todos, loading, error, onAdd }) {
+export default function TodoPanel({
+  selectedDate,
+  todos,
+  loading,
+  error,
+  onAdd,
+  onToggle,
+  onEdit,
+}) {
   return (
     <div className="bg-white rounded-lg shadow p-4">
       <div className="flex items-center justify-between mb-3">
@@ -25,23 +34,7 @@ export default function TodoPanel({ selectedDate, todos, loading, error, onAdd }
       {!loading && !error && todos.length > 0 && (
         <ul className="space-y-2">
           {todos.map((t) => (
-            <li
-              key={t.id}
-              className="flex items-center gap-2 p-2 rounded border border-gray-200"
-            >
-              <input
-                type="checkbox"
-                checked={t.completed}
-                disabled
-                aria-label={`${t.title} 완료 여부`}
-                className="h-4 w-4"
-              />
-              <span
-                className={t.completed ? 'line-through text-gray-400' : 'text-gray-900'}
-              >
-                {t.title}
-              </span>
-            </li>
+            <TodoItem key={t.id} todo={t} onToggle={onToggle} onEdit={onEdit} />
           ))}
         </ul>
       )}

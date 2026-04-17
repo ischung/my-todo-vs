@@ -34,4 +34,26 @@ function create({ title, date }) {
   return findById(lastInsertRowid);
 }
 
-module.exports = { findByDate, findById, create };
+function update(id, patch) {
+  const db = getDb();
+  const fields = [];
+  const values = [];
+  if (typeof patch.title !== 'undefined') {
+    fields.push('title = ?');
+    values.push(patch.title);
+  }
+  if (typeof patch.completed !== 'undefined') {
+    fields.push('completed = ?');
+    values.push(patch.completed ? 1 : 0);
+  }
+  if (fields.length === 0) return findById(id);
+  fields.push("updated_at = datetime('now')");
+  values.push(id);
+  const result = db
+    .prepare(`UPDATE todos SET ${fields.join(', ')} WHERE id = ?`)
+    .run(...values);
+  if (result.changes === 0) return null;
+  return findById(id);
+}
+
+module.exports = { findByDate, findById, create, update };

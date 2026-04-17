@@ -106,3 +106,56 @@ describe('POST /api/todos', () => {
     expect(res.status).toBe(400);
   });
 });
+
+describe('PATCH /api/todos/:id', () => {
+  let app;
+  let tmpPath;
+  let created;
+
+  beforeAll(async () => {
+    tmpPath = path.join(os.tmpdir(), `todos-patch-test-${Date.now()}.db`);
+    process.env.DB_PATH = tmpPath;
+    jest.resetModules();
+    app = require('../src/app').createApp({ spaDir: '/nonexistent' });
+    const res = await request(app)
+      .post('/api/todos')
+      .send({ title: 'original', date: '2026-04-17' });
+    created = res.body;
+  });
+
+  afterAll(() => {
+    require('../src/db').closeDb();
+    if (fs.existsSync(tmpPath)) fs.unlinkSync(tmpPath);
+    delete process.env.DB_PATH;
+  });
+
+  it('updates title', async () => {
+    const res = await request(app)
+      .patch(`/api/todos/${created.id}`)
+      .send({ title: 'updated' });
+    expect(res.status).toBe(200);
+    expect(res.body.title).toBe('updated');
+  });
+
+  it('toggles completed', async () => {
+    const res = await request(app)
+      .patch(`/api/todos/${created.id}`)
+      .send({ completed: true });
+    expect(res.status).toBe(200);
+    expect(res.body.completed).toBe(true);
+  });
+
+  it('returns 404 for missing id', async () => {
+    const res = await request(app)
+      .patch(`/api/todos/99999`)
+      .send({ title: 'nope' });
+    expect(res.status).toBe(404);
+  });
+
+  it('returns 400 for empty title', async () => {
+    const res = await request(app)
+      .patch(`/api/todos/${created.id}`)
+      .send({ title: '' });
+    expect(res.status).toBe(400);
+  });
+});

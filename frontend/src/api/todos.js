@@ -19,3 +19,11 @@ export function createTodo({ title, date }) {
     body: JSON.stringify({ title, date }),
   }).then(handle);
 }
+
+export function updateTodo(id, patch) {
+  return fetch(`/api/todos/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(patch),
+  }).then(handle);
+}

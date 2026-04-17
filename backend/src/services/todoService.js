@@ -35,4 +35,27 @@ function createTodo({ title, date }) {
   return repo.create({ title: title.trim(), date });
 }
 
-module.exports = { listByDate, createTodo, HttpError };
+function updateTodo(id, patch) {
+  const parsedId = Number(id);
+  if (!Number.isInteger(parsedId) || parsedId <= 0) {
+    throw new HttpError(400, '잘못된 ID입니다.');
+  }
+  const clean = {};
+  if (typeof patch.title !== 'undefined') {
+    assertTitle(patch.title);
+    clean.title = patch.title.trim();
+  }
+  if (typeof patch.completed !== 'undefined') {
+    if (typeof patch.completed !== 'boolean') {
+      throw new HttpError(400, 'completed 는 boolean이어야 합니다.');
+    }
+    clean.completed = patch.completed;
+  }
+  const updated = repo.update(parsedId, clean);
+  if (!updated) {
+    throw new HttpError(404, '해당 할일을 찾을 수 없습니다.');
+  }
+  return updated;
+}
+
+module.exports = { listByDate, createTodo, updateTodo, HttpError };

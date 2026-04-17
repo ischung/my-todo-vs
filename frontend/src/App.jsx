@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import Calendar from './components/Calendar.jsx';
 import TodoPanel from './components/TodoPanel.jsx';
 import Toast from './components/Toast.jsx';
-import { fetchTodosByDate, createTodo } from './api/todos.js';
+import { fetchTodosByDate, createTodo, updateTodo } from './api/todos.js';
 import { todayISO } from './utils/date.js';
 
 function initialMonth() {
@@ -29,6 +29,21 @@ export default function App() {
     },
     [selectedDate]
   );
+
+  const handleToggle = useCallback(async (id, completed) => {
+    try {
+      const updated = await updateTodo(id, { completed });
+      setTodos((prev) => prev.map((t) => (t.id === id ? updated : t)));
+    } catch (err) {
+      setToast(err.message || '수정하지 못했어요. 다시 시도해주세요.');
+    }
+  }, []);
+
+  const handleEdit = useCallback(async (id, patch) => {
+    const updated = await updateTodo(id, patch);
+    setTodos((prev) => prev.map((t) => (t.id === id ? updated : t)));
+    return updated;
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -75,6 +90,8 @@ export default function App() {
             loading={loading}
             error={error}
             onAdd={handleAdd}
+            onToggle={handleToggle}
+            onEdit={handleEdit}
           />
         </div>
       </main>
