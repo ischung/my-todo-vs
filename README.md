@@ -60,12 +60,27 @@ docker run -d -p 8080:8080 -v $(pwd)/data:/app/data my-todo-vs:dev
 - Healthcheck: 30초 간격 `/api/health` 호출
 - 이미지 크기: ~225MB (better-sqlite3 native 포함)
 
-### GHCR 이미지 사용 (추후, issue #7 완료 후)
+### GHCR 이미지 사용 ✅ (issue #7)
+
+공개 이미지가 GHCR에 올라간 뒤, 누구나 아래 명령으로 바로 실행할 수 있습니다.
 
 ```bash
-docker pull ghcr.io/ischung/my-todo-vs:stable
-docker run -d -p 8080:8080 -v ./data:/app/data ghcr.io/ischung/my-todo-vs:stable
+docker pull ghcr.io/ischung/my-todo-vs:v0.0.1
+docker run -d -p 8080:8080 -v $(pwd)/data:/app/data \
+  ghcr.io/ischung/my-todo-vs:v0.0.1
+open http://localhost:8080
 ```
+
+#### 이미지 최초 publish (리포 관리자 1회)
+
+`write:packages`, `read:packages` 스코프가 포함된 PAT(`KANBAN_TOKEN`)를 준비한 뒤:
+
+```bash
+export KANBAN_TOKEN=ghp_...          # 토큰은 세션 종료 후 unset 권장
+bash scripts/publish-ghcr.sh v0.0.1
+```
+
+스크립트는 build → login → push(:v0.0.1 + :latest) → logout 순으로 실행됩니다. 그 후 GitHub 웹에서 **패키지를 public으로 전환**하고 리포지토리와 연결해주세요. 자세한 단계는 스크립트 출력 메시지를 따라가면 됩니다.
 
 ## 개발 워크플로우
 
