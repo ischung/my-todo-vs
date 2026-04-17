@@ -27,3 +27,7 @@ export function updateTodo(id, patch) {
     body: JSON.stringify(patch),
   }).then(handle);
 }
+
+export function deleteTodo(id) {
+  return fetch(`/api/todos/${id}`, { method: 'DELETE' }).then(handle);
+}

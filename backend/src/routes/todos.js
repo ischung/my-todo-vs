@@ -31,4 +31,13 @@ router.patch('/:id', (req, res, next) => {
   }
 });
 
+router.delete('/:id', (req, res, next) => {
+  try {
+    service.deleteTodo(req.params.id);
+    res.status(204).send();
+  } catch (err) {
+    next(err);
+  }
+});
+
 module.exports = router;

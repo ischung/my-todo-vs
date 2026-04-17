@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-export default function TodoItem({ todo, onToggle, onEdit }) {
+export default function TodoItem({ todo, onToggle, onEdit, onDelete }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(todo.title);
   const [error, setError] = useState(null);
@@ -58,16 +58,31 @@ export default function TodoItem({ todo, onToggle, onEdit }) {
           {error && <span className="text-red-500 text-xs">{error}</span>}
         </div>
       ) : (
-        <button
-          type="button"
-          onClick={() => setEditing(true)}
-          className={`flex-1 text-left cursor-pointer ${
-            todo.completed ? 'line-through text-gray-400' : 'text-gray-900'
-          }`}
-          aria-label={`${todo.title} 수정`}
-        >
-          {todo.title}
-        </button>
+        <>
+          <button
+            type="button"
+            onClick={() => setEditing(true)}
+            className={`flex-1 text-left cursor-pointer ${
+              todo.completed ? 'line-through text-gray-400' : 'text-gray-900'
+            }`}
+            aria-label={`${todo.title} 수정`}
+          >
+            {todo.title}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              if (window.confirm('정말 삭제할까요?')) {
+                onDelete(todo.id);
+              }
+            }}
+            aria-label={`${todo.title} 삭제`}
+            className="text-gray-400 hover:text-red-500 text-lg px-1"
+            title="삭제"
+          >
+            🗑
+          </button>
+        </>
       )}
     </li>
   );

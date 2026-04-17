@@ -159,3 +159,35 @@ describe('PATCH /api/todos/:id', () => {
     expect(res.status).toBe(400);
   });
 });
+
+describe('DELETE /api/todos/:id', () => {
+  let app;
+  let tmpPath;
+
+  beforeAll(() => {
+    tmpPath = path.join(os.tmpdir(), `todos-del-test-${Date.now()}.db`);
+    process.env.DB_PATH = tmpPath;
+    jest.resetModules();
+    app = require('../src/app').createApp({ spaDir: '/nonexistent' });
+  });
+
+  afterAll(() => {
+    require('../src/db').closeDb();
+    if (fs.existsSync(tmpPath)) fs.unlinkSync(tmpPath);
+    delete process.env.DB_PATH;
+  });
+
+  it('deletes a todo and returns 204', async () => {
+    const created = await request(app)
+      .post('/api/todos')
+      .send({ title: 'to delete', date: '2026-04-17' });
+    const res = await request(app).delete(`/api/todos/${created.body.id}`);
+    expect(res.status).toBe(204);
+    expect(res.body).toEqual({});
+  });
+
+  it('returns 404 for missing id', async () => {
+    const res = await request(app).delete(`/api/todos/99999`);
+    expect(res.status).toBe(404);
+  });
+});
