@@ -160,6 +160,45 @@ describe('PATCH /api/todos/:id', () => {
   });
 });
 
+describe('GET /api/todos/dates', () => {
+  let app;
+  let tmpPath;
+
+  beforeAll(async () => {
+    tmpPath = path.join(os.tmpdir(), `todos-dates-test-${Date.now()}.db`);
+    process.env.DB_PATH = tmpPath;
+    jest.resetModules();
+    app = require('../src/app').createApp({ spaDir: '/nonexistent' });
+    await request(app).post('/api/todos').send({ title: 'a', date: '2026-04-03' });
+    await request(app).post('/api/todos').send({ title: 'b', date: '2026-04-17' });
+    await request(app).post('/api/todos').send({ title: 'c', date: '2026-04-17' });
+    await request(app).post('/api/todos').send({ title: 'd', date: '2026-05-01' });
+  });
+
+  afterAll(() => {
+    require('../src/db').closeDb();
+    if (fs.existsSync(tmpPath)) fs.unlinkSync(tmpPath);
+    delete process.env.DB_PATH;
+  });
+
+  it('returns distinct dates in requested month', async () => {
+    const res = await request(app).get('/api/todos/dates?year=2026&month=4');
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual(['2026-04-03', '2026-04-17']);
+  });
+
+  it('returns empty array for month with no todos', async () => {
+    const res = await request(app).get('/api/todos/dates?year=2026&month=12');
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual([]);
+  });
+
+  it('returns 400 for invalid month', async () => {
+    const res = await request(app).get('/api/todos/dates?year=2026&month=13');
+    expect(res.status).toBe(400);
+  });
+});
+
 describe('DELETE /api/todos/:id', () => {
   let app;
   let tmpPath;

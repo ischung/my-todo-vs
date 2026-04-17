@@ -13,6 +13,15 @@ router.get('/', (req, res, next) => {
   }
 });
 
+router.get('/dates', (req, res, next) => {
+  try {
+    const dates = service.listDatesInMonth(req.query.year, req.query.month);
+    res.json(dates);
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.post('/', (req, res, next) => {
   try {
     const todo = service.createTodo(req.body || {});
