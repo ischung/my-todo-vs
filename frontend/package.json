@@ -1,0 +1,11 @@
+{
+  "name": "frontend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "날짜별 할일 관리 앱 — React SPA (scaffold, 실제 내용은 issue #4에서 채움)",
+  "scripts": {
+    "dev": "echo 'frontend dev: TBD (issue #4)'",
+    "build": "echo 'frontend build: TBD (issue #4)'",
+    "test": "echo 'no tests yet'"
+  }
+}
