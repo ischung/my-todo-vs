@@ -13,8 +13,14 @@
     "dev:frontend": "npm run dev --workspace=frontend",
     "build": "npm run build --workspace=frontend",
     "start": "npm start --workspace=backend",
-    "lint": "echo 'lint: TBD (issue #6)'",
+    "lint": "eslint \"{backend,frontend,e2e,scripts}/**/*.{js,jsx}\" --max-warnings=0",
+    "format": "prettier --write \"{backend,frontend,e2e,scripts}/**/*.{js,jsx,json,css,html,md}\"",
     "test": "npm test --workspaces --if-present"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "eslint-plugin-react": "^7.35.0",
+    "prettier": "^3.3.3"
   },
   "engines": {
     "node": ">=20"

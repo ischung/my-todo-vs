@@ -66,4 +66,4 @@ if [ ! -d "$HOME/Library/Caches/ms-playwright" ] && [ ! -d "$HOME/.cache/ms-play
   npx playwright install chromium
 fi
 
-E2E_BASE_URL=http://localhost:8080 npx playwright test --grep @smoke
+E2E_BASE_URL=http://localhost:8080 npm run smoke --workspace=e2e
