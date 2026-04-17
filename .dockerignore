@@ -1,0 +1,33 @@
+# Dependencies (rebuilt in image)
+**/node_modules
+frontend/dist
+
+# Git / CI / editor
+.git
+.github
+.claude
+.vscode
+.idea
+
+# Local data & logs
+data
+*.log
+coverage
+playwright-report
+test-results
+
+# Docs & dev-only files
+*.md
+.nvmrc
+.env
+.env.*
+
+# Tests (not needed at runtime)
+**/*.test.js
+**/*.test.jsx
+backend/tests
+frontend/src/test
+
+# Misc
+.DS_Store
+Thumbs.db
